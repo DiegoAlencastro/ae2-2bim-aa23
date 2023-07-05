@@ -15,22 +15,33 @@ def obtener_data():
         lineas = csv.reader(archivo, quotechar="|")
         for row in lineas:
             # pass
-            # lista.append((numero, pagina))
+            lineaDividida = row[0].split('|')
+            numero =  lineaDividida[0]
+            pagina = lineaDividida[1]
+            print("Numero de pagina: %s  - URL: %s en archivo csv" % (numero, pagina ))
+            lista.append((numero, pagina))
     # se retorna la lista con la información que se necesita
+    time.sleep(2)
     return lista
 
 def worker(numero, url):
     print("Iniciando %s %s" % (threading.current_thread().getName(), url ))
     # pass
-    time.sleep(10)
-    print("Finalizando %s" % (threading.current_thread().getName()))
+    paginaRequest = requests.get(url)
+    print("Url: %s - estado (200 ok): %s" % (url, paginaRequest.status_code ))
+    archivo = open("salida/%s.txt" % numero,"w", encoding='utf-8')
+    archivo.writelines(paginaRequest.text)
+    archivo.close()
+    print("Archivo creado de Url - %s" % (url))
+    time.sleep(4)
+    print("Finalizando %s numero: %s" % (threading.current_thread().getName(),numero))
 
 for c in obtener_data():
     # Se crea los hilos
     # en la función
     numero = c[0]
     url = c[1]
-    hilo1 = threading.Thread(name='navegando...',
+    hilo1 = threading.Thread(name='Navegando...',
                             target=worker,
                             args=(numero, url))
     hilo1.start()
